@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Product.OpenApi", "Product.OpenApi\Product.OpenApi.csproj", "{6031E75A-4E5C-415C-8E64-8EA8A7C63CD0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6031E75A-4E5C-415C-8E64-8EA8A7C63CD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6031E75A-4E5C-415C-8E64-8EA8A7C63CD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6031E75A-4E5C-415C-8E64-8EA8A7C63CD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6031E75A-4E5C-415C-8E64-8EA8A7C63CD0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
