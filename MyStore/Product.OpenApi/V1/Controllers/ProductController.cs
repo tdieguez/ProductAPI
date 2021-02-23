@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using Product.OpenApi.Dtos;
 
 namespace Product.OpenApi.V1.Controllers
 {
@@ -21,6 +23,7 @@ namespace Product.OpenApi.V1.Controllers
         public IActionResult GetOne(long id)
         {
             var product = _productCollection.FirstOrDefault(p => p.Id == id);
+
             if (product == null)
             {
                 return NotFound();
@@ -30,15 +33,41 @@ namespace Product.OpenApi.V1.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create()
+        public ActionResult<ProductDto> Create(ProductDto product)
         {
-            return Ok("Test");
+            var productEntity = new Entities.Product
+            {
+                Id = (_productCollection.Max(p => p.Id) + 1),
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                Category = product.Category,
+                CreatedAt = DateTimeOffset.Now,
+                ModifiedAt = DateTimeOffset.Now
+            };
+
+            _productCollection.Add(productEntity);
+
+            return Ok(productEntity);
         }
 
-        [HttpPut]
-        public IActionResult Update()
+        [HttpPut("{id}")]
+        public ActionResult<ProductDto> Update(long id, ProductDto product)
         {
-            return Ok("Test");
+            var productEntity = _productCollection.FirstOrDefault(p => p.Id == id);
+
+            if (productEntity == null)
+            {
+                return NotFound();
+            }
+
+            productEntity.Name = product.Name;
+            productEntity.Description = product.Description;
+            productEntity.Price = product.Price;
+            productEntity.Category = product.Category;
+            productEntity.ModifiedAt = DateTimeOffset.Now;
+
+            return Ok(productEntity);
         }
 
         [HttpPatch]
