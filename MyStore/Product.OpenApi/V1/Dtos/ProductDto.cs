@@ -1,4 +1,4 @@
-﻿namespace Product.OpenApi.Dtos
+﻿namespace Product.OpenApi.V1.Dtos
 {
     public class ProductDto
     {

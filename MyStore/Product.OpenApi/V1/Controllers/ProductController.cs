@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Product.OpenApi.Dtos;
+using Product.OpenApi.V1.Dtos;
 
 namespace Product.OpenApi.V1.Controllers
 {
@@ -70,16 +71,47 @@ namespace Product.OpenApi.V1.Controllers
             return Ok(productEntity);
         }
 
-        [HttpPatch]
-        public IActionResult UpdatePartial()
+        [HttpPatch("{id}")]
+        public IActionResult PartiallyUpdate(long id, JsonPatchDocument<ProductDto> patchDocument)
         {
-            return Ok("Test");
+            var product = _productCollection.FirstOrDefault(p => p.Id == id);
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            var productDto = new ProductDto
+            {
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                Category = product.Category
+            };
+
+            patchDocument.ApplyTo(productDto);
+
+            product.Name = productDto.Name;
+            product.Description = productDto.Description;
+            product.Price = productDto.Price;
+            product.Category = productDto.Category;
+
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete()
+        public IActionResult Delete(long id)
         {
-            return Ok("Test");
+            var product = _productCollection.FirstOrDefault(p => p.Id == id);
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            _productCollection.Remove(product);
+
+            return NoContent();
         }
     }
 }
