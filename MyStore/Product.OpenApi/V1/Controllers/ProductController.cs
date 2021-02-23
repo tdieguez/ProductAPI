@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Product.OpenApi.Dtos;
+using Product.OpenApi.V1.Dtos;
 
 namespace Product.OpenApi.V1.Controllers
 {
@@ -77,9 +77,18 @@ namespace Product.OpenApi.V1.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete()
+        public IActionResult Delete(long id)
         {
-            return Ok("Test");
+            var product = _productCollection.FirstOrDefault(p => p.Id == id);
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            _productCollection.Remove(product);
+
+            return NoContent();
         }
     }
 }
