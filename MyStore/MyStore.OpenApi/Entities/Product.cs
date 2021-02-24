@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Product.OpenApi.Entities
+namespace MyStore.OpenApi.Entities
 {
     public class Product
     {

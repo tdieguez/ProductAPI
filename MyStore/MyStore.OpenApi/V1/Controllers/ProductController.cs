@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Product.OpenApi.V1.Dtos;
+using MyStore.OpenApi.Entities;
+using MyStore.OpenApi.V1.Dtos;
 
-namespace Product.OpenApi.V1.Controllers
+namespace MyStore.OpenApi.V1.Controllers
 {
     [ApiController()]
     [Route("api/product")]
     public class ProductController : ControllerBase
     {
         //TODO: remove static collection once the EF Core is implemented
-        private static ICollection<Entities.Product> _productCollection = Entities.Product.GetCollection();
+        private static ICollection<Product> _productCollection = Entities.Product.GetCollection();
 
         [HttpGet]
         public IActionResult GetAll()
