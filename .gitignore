@@ -1,2 +1,3 @@
-/MyStore/MyStore.OpenApi/bin/*
-/MyStore/MyStore.OpenApi/obj/*
+bin
+obj
+idea
