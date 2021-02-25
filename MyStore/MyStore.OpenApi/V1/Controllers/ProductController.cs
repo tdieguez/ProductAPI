@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using MyStore.OpenApi.Data;
 using MyStore.OpenApi.Entities;
 using MyStore.OpenApi.V1.Dtos;
 
@@ -12,19 +13,23 @@ namespace MyStore.OpenApi.V1.Controllers
     [Route("api/product")]
     public class ProductController : ControllerBase
     {
-        //TODO: remove static collection once the EF Core is implemented
-        private static ICollection<Product> _productCollection = Entities.Product.GetCollection();
+        private readonly MyStoreDbContext _dbContext;
+
+        public ProductController(MyStoreDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
 
         [HttpGet]
         public IActionResult GetAll()
         {
-            return Ok(_productCollection);
+            return Ok(_dbContext.Products.ToList());
         }
 
         [HttpGet("{id}")]
         public IActionResult GetOne(long id)
         {
-            var product = _productCollection.FirstOrDefault(p => p.Id == id);
+            var product = _dbContext.Products.FirstOrDefault(p => p.Id == id);
 
             if (product == null)
             {
@@ -37,9 +42,8 @@ namespace MyStore.OpenApi.V1.Controllers
         [HttpPost]
         public ActionResult<ProductDto> Create(ProductDto product)
         {
-            var productEntity = new Entities.Product
+            var productEntity = new Product
             {
-                Id = (_productCollection.Max(p => p.Id) + 1),
                 Name = product.Name,
                 Description = product.Description,
                 Price = product.Price,
@@ -48,7 +52,8 @@ namespace MyStore.OpenApi.V1.Controllers
                 ModifiedAt = DateTimeOffset.Now
             };
 
-            _productCollection.Add(productEntity);
+            _dbContext.Add(productEntity);
+            _dbContext.SaveChanges();
 
             return Ok(productEntity);
         }
@@ -56,7 +61,7 @@ namespace MyStore.OpenApi.V1.Controllers
         [HttpPut("{id}")]
         public ActionResult<ProductDto> Update(long id, ProductDto product)
         {
-            var productEntity = _productCollection.FirstOrDefault(p => p.Id == id);
+            var productEntity = _dbContext.Products.FirstOrDefault(p => p.Id == id);
 
             if (productEntity == null)
             {
@@ -69,13 +74,15 @@ namespace MyStore.OpenApi.V1.Controllers
             productEntity.Category = product.Category;
             productEntity.ModifiedAt = DateTimeOffset.Now;
 
+            _dbContext.SaveChanges();
+
             return Ok(productEntity);
         }
 
         [HttpPatch("{id}")]
         public IActionResult PartiallyUpdate(long id, JsonPatchDocument<ProductDto> patchDocument)
         {
-            var product = _productCollection.FirstOrDefault(p => p.Id == id);
+            var product = _dbContext.Products.FirstOrDefault(p => p.Id == id);
 
             if (product == null)
             {
@@ -97,20 +104,23 @@ namespace MyStore.OpenApi.V1.Controllers
             product.Price = productDto.Price;
             product.Category = productDto.Category;
 
+            _dbContext.SaveChanges();
+
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(long id)
         {
-            var product = _productCollection.FirstOrDefault(p => p.Id == id);
+            var product = _dbContext.Products.FirstOrDefault(p => p.Id == id);
 
             if (product == null)
             {
                 return NotFound();
             }
 
-            _productCollection.Remove(product);
+            _dbContext.Products.Remove(product);
+            _dbContext.SaveChanges();
 
             return NoContent();
         }
