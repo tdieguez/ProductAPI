@@ -10,7 +10,7 @@ using MyStore.OpenApi.Data;
 namespace MyStore.OpenApi.Data.Migrations
 {
     [DbContext(typeof(MyStoreDbContext))]
-    [Migration("20210225182025_InitialMigration")]
+    [Migration("20210226064338_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

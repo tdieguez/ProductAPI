@@ -52,28 +52,6 @@ namespace MyStore.OpenApi.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Products");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1L,
-                            Category = "Food",
-                            CreatedAt = new DateTimeOffset(new DateTime(2020, 11, 17, 19, 50, 52, 886, DateTimeKind.Unspecified).AddTicks(974), new TimeSpan(0, 1, 0, 0, 0)),
-                            Description = "Brazilian seafood stew. It is slowly cooked in a terracotta cassole. Moqueca can be made with shrimp or fish as a base with tomatoes, onions, garlic, lime and coriander.",
-                            ModifiedAt = new DateTimeOffset(new DateTime(2020, 11, 17, 19, 50, 52, 890, DateTimeKind.Unspecified).AddTicks(7608), new TimeSpan(0, 1, 0, 0, 0)),
-                            Name = "Moqueca Capixaba",
-                            Price = 99.989999999999995
-                        },
-                        new
-                        {
-                            Id = 2L,
-                            Category = "Food",
-                            CreatedAt = new DateTimeOffset(new DateTime(2020, 11, 17, 19, 50, 52, 890, DateTimeKind.Unspecified).AddTicks(7978), new TimeSpan(0, 1, 0, 0, 0)),
-                            Description = "Traditional and complex Brazilian dish originated from Espirito Santo. This seafood pie is made with a massive list of ingredients: fish such as sea bass, hake, and grouper, mussels, siri crabmeat, oysters, salt cod, shrimp, olive oil, garlic, onions, tomatoes, green onions, cilantro, red bell peppers, annatto oil, coconut milk, cloves, cinnamon, white vinegar, palm hearts, olives, and eggs.",
-                            ModifiedAt = new DateTimeOffset(new DateTime(2020, 11, 17, 19, 50, 52, 890, DateTimeKind.Unspecified).AddTicks(7994), new TimeSpan(0, 1, 0, 0, 0)),
-                            Name = "Torta Capixaba",
-                            Price = 99.989999999999995
-                        });
                 });
 #pragma warning restore 612, 618
         }
