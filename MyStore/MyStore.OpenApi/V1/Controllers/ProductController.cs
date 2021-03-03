@@ -122,7 +122,7 @@ namespace MyStore.OpenApi.V1.Controllers
             }
 
             _dbContext.Products.Remove(product);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
 
             return NoContent();
         }
