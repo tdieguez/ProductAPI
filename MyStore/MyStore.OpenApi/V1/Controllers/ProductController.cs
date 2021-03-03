@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MyStore.OpenApi.Data;
 using MyStore.OpenApi.Entities;
 using MyStore.OpenApi.V1.Dtos;
@@ -21,15 +23,15 @@ namespace MyStore.OpenApi.V1.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            return Ok(_dbContext.Products.ToList());
+            return Ok(await _dbContext.Products.ToListAsync());
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetOne(long id)
+        public async Task<IActionResult> GetOne(long id)
         {
-            var product = _dbContext.Products.FirstOrDefault(p => p.Id == id);
+            var product = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == id);
 
             if (product == null)
             {
@@ -40,7 +42,7 @@ namespace MyStore.OpenApi.V1.Controllers
         }
 
         [HttpPost]
-        public ActionResult<ProductDto> Create(ProductDto product)
+        public async Task<ActionResult<ProductDto>> Create(ProductDto product)
         {
             var productEntity = new Product
             {
@@ -53,13 +55,13 @@ namespace MyStore.OpenApi.V1.Controllers
             };
 
             _dbContext.Add(productEntity);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
 
             return Ok(productEntity);
         }
 
         [HttpPut("{id}")]
-        public ActionResult<ProductDto> Update(long id, ProductDto product)
+        public async Task<ActionResult<ProductDto>> Update(long id, ProductDto product)
         {
             var productEntity = _dbContext.Products.FirstOrDefault(p => p.Id == id);
 
@@ -74,15 +76,15 @@ namespace MyStore.OpenApi.V1.Controllers
             productEntity.Category = product.Category;
             productEntity.ModifiedAt = DateTimeOffset.Now;
 
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
 
             return Ok(productEntity);
         }
 
         [HttpPatch("{id}")]
-        public IActionResult PartiallyUpdate(long id, JsonPatchDocument<ProductDto> patchDocument)
+        public async Task<IActionResult> PartiallyUpdate(long id, JsonPatchDocument<ProductDto> patchDocument)
         {
-            var product = _dbContext.Products.FirstOrDefault(p => p.Id == id);
+            var product = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == id);
 
             if (product == null)
             {
@@ -104,15 +106,15 @@ namespace MyStore.OpenApi.V1.Controllers
             product.Price = productDto.Price;
             product.Category = productDto.Category;
 
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
 
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(long id)
+        public async Task<IActionResult> Delete(long id)
         {
-            var product = _dbContext.Products.FirstOrDefault(p => p.Id == id);
+            var product = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == id);
 
             if (product == null)
             {
