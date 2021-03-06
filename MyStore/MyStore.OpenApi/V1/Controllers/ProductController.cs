@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyStore.OpenApi.Data;
 using MyStore.OpenApi.Entities;
+using MyStore.OpenApi.Extensions;
 using MyStore.OpenApi.V1.Dtos;
+using MyStore.OpenApi.V1.Validators;
 
 namespace MyStore.OpenApi.V1.Controllers
 {
@@ -100,6 +102,12 @@ namespace MyStore.OpenApi.V1.Controllers
             };
 
             patchDocument.ApplyTo(productDto);
+
+            var validationResult = await new ProductValidator().ValidateAsync(productDto);
+            if (!validationResult.IsValid)
+            {
+                return ValidationProblem(validationResult.ToModelState());
+            }
 
             product.Name = productDto.Name;
             product.Description = productDto.Description;
