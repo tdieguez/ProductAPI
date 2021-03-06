@@ -1,3 +1,4 @@
+using System;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -31,6 +32,8 @@ namespace MyStore.OpenApi
                     fv.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
                     fv.RegisterValidatorsFromAssemblyContaining<ProductValidator>(lifetime: ServiceLifetime.Singleton);
                 });
+
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddDbContext<MyStoreDbContext>(
                 options => options.UseSqlServer(Configuration.GetConnectionString("MyStoreDb")));
