@@ -1,3 +1,4 @@
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -5,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MyStore.OpenApi.Data;
+using MyStore.OpenApi.V1.Validators;
 
 namespace MyStore.OpenApi
 {
@@ -23,7 +25,12 @@ namespace MyStore.OpenApi
         {
             services
                 .AddControllers()
-                .AddNewtonsoftJson();
+                .AddNewtonsoftJson()
+                .AddFluentValidation(fv =>
+                {
+                    fv.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
+                    fv.RegisterValidatorsFromAssemblyContaining<ProductValidator>(lifetime: ServiceLifetime.Singleton);
+                });
 
             services.AddDbContext<MyStoreDbContext>(
                 options => options.UseSqlServer(Configuration.GetConnectionString("MyStoreDb")));
