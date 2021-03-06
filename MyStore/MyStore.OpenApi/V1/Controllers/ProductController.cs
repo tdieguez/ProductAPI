@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,10 +18,12 @@ namespace MyStore.OpenApi.V1.Controllers
     public class ProductController : ControllerBase
     {
         private readonly MyStoreDbContext _dbContext;
+        private readonly IMapper _mapper;
 
-        public ProductController(MyStoreDbContext dbContext)
+        public ProductController(MyStoreDbContext dbContext, IMapper mapper)
         {
             _dbContext = dbContext;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -33,28 +35,22 @@ namespace MyStore.OpenApi.V1.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOne(long id)
         {
-            var product = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == id);
+            var productEntity = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == id);
 
-            if (product == null)
+            if (productEntity == null)
             {
                 return NotFound();
             }
 
-            return Ok(product);
+            return Ok(productEntity);
         }
 
         [HttpPost]
         public async Task<ActionResult<ProductDto>> Create(ProductDto product)
         {
-            var productEntity = new Product
-            {
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Category = product.Category,
-                CreatedAt = DateTimeOffset.Now,
-                ModifiedAt = DateTimeOffset.Now
-            };
+            var productEntity = _mapper.Map<Product>(product);
+            productEntity.CreatedAt = DateTimeOffset.Now;
+            productEntity.ModifiedAt = DateTimeOffset.Now;
 
             _dbContext.Add(productEntity);
             await _dbContext.SaveChangesAsync();
@@ -72,10 +68,7 @@ namespace MyStore.OpenApi.V1.Controllers
                 return NotFound();
             }
 
-            productEntity.Name = product.Name;
-            productEntity.Description = product.Description;
-            productEntity.Price = product.Price;
-            productEntity.Category = product.Category;
+            _mapper.Map(product, productEntity);
             productEntity.ModifiedAt = DateTimeOffset.Now;
 
             await _dbContext.SaveChangesAsync();
@@ -86,20 +79,14 @@ namespace MyStore.OpenApi.V1.Controllers
         [HttpPatch("{id}")]
         public async Task<IActionResult> PartiallyUpdate(long id, JsonPatchDocument<ProductDto> patchDocument)
         {
-            var product = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == id);
+            var productEntity = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == id);
 
-            if (product == null)
+            if (productEntity == null)
             {
                 return NotFound();
             }
 
-            var productDto = new ProductDto
-            {
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Category = product.Category
-            };
+            var productDto = _mapper.Map<ProductDto>(productEntity);
 
             patchDocument.ApplyTo(productDto);
 
@@ -108,12 +95,10 @@ namespace MyStore.OpenApi.V1.Controllers
             {
                 return ValidationProblem(validationResult.ToModelState());
             }
-
-            product.Name = productDto.Name;
-            product.Description = productDto.Description;
-            product.Price = productDto.Price;
-            product.Category = productDto.Category;
-
+            
+            _mapper.Map(productDto, productEntity);
+            productEntity.ModifiedAt = DateTimeOffset.Now;
+ 
             await _dbContext.SaveChangesAsync();
 
             return NoContent();
