@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using MyStore.OpenApi.Entities;
 
 namespace MyStore.OpenApi.Data.Configurations
 {
-    public class ProductConfiguration : IEntityTypeConfiguration<Entities.Product>
+    public class ProductConfiguration : IEntityTypeConfiguration<Product>
     {
-        public void Configure(EntityTypeBuilder<Entities.Product> builder)
+        public void Configure(EntityTypeBuilder<Product> builder)
         {
             builder.Property(p => p.Name)
                 .HasMaxLength(100)
@@ -15,8 +16,9 @@ namespace MyStore.OpenApi.Data.Configurations
                 .HasMaxLength(500)
                 .IsRequired();
 
-            builder.Property(p => p.Category)
-                .HasMaxLength(50);
+            builder.HasOne(p => p.Category)
+                .WithMany(c => c.Products)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
