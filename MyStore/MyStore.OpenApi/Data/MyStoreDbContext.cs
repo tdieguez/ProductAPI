@@ -6,6 +6,7 @@ namespace MyStore.OpenApi.Data
 {
     public class MyStoreDbContext : DbContext
     {
+        public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
 
 
