@@ -17,9 +17,6 @@ namespace MyStore.OpenApi.V1.Validators
 
             RuleFor(p => p.Price)
                 .GreaterThanOrEqualTo(0);
-
-            RuleFor(p => p.Category)
-                .MaximumLength(50);
         }
     }
 }
