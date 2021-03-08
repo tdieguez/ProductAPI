@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -10,6 +11,7 @@ using MyStore.OpenApi.Entities;
 using MyStore.OpenApi.Extensions;
 using MyStore.OpenApi.V1.Dtos;
 using MyStore.OpenApi.V1.Validators;
+using MyStore.OpenApi.V1.ViewModels;
 
 namespace MyStore.OpenApi.V1.Controllers
 {
@@ -27,66 +29,79 @@ namespace MyStore.OpenApi.V1.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<ActionResult<IEnumerable<CategoryViewModel>>> GetAll()
         {
-            return Ok(await _dbContext.Categories.ToListAsync());
+            var categories
+                = await _dbContext
+                    .Categories
+                    .ToListAsync();
+
+            return Ok(_mapper.Map<IEnumerable<CategoryViewModel>>(categories));
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetOne(long id)
+        public async Task<ActionResult<CategoryViewModel>> GetOne(long id)
         {
-            var categoryEntity = await _dbContext.Categories.FirstOrDefaultAsync(p => p.Id == id);
+            var category
+                = await _dbContext
+                    .Categories
+                    .FirstOrDefaultAsync(p => p.Id == id);
 
-            if (categoryEntity == null)
+            if (category == null)
             {
-                return NotFound();
+                return NotFound("Category not found.");
             }
 
-            return Ok(categoryEntity);
+            return Ok(_mapper.Map<CategoryViewModel>(category));
         }
 
         [HttpPost]
-        public async Task<ActionResult<ProductDto>> Create(CategoryDto category)
+        public async Task<ActionResult<CategoryViewModel>> Create(CategoryDto categoryDto)
         {
-            var categoryEntity = _mapper.Map<Category>(category);
+            var category = _mapper.Map<Category>(categoryDto);
 
-            categoryEntity.CreatedAt = DateTimeOffset.Now;
-            categoryEntity.ModifiedAt = DateTimeOffset.Now;
-            _dbContext.Add(categoryEntity);
+            category.CreatedAt = DateTimeOffset.Now;
+            category.ModifiedAt = DateTimeOffset.Now;
+            _dbContext.Add(category);
             await _dbContext.SaveChangesAsync();
 
-            return Ok(categoryEntity);
+            return Ok(_mapper.Map<CategoryViewModel>(category));
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<ProductDto>> Update(long id, CategoryDto category)
+        public async Task<ActionResult<ProductDto>> Update(long id, CategoryDto categoryDto)
         {
-            var categoryEntity = _dbContext.Categories.FirstOrDefault(p => p.Id == id);
+            var category
+                = await _dbContext
+                    .Categories
+                    .FirstOrDefaultAsync(p => p.Id == id);
 
-            if (categoryEntity == null)
+            if (category == null)
             {
-                return NotFound();
+                return NotFound("Category not found.");
             }
 
-            _mapper.Map(category, categoryEntity);
-            categoryEntity.ModifiedAt = DateTimeOffset.Now;
-
+            _mapper.Map(categoryDto, category);
+            category.ModifiedAt = DateTimeOffset.Now;
             await _dbContext.SaveChangesAsync();
 
-            return Ok(categoryEntity);
+            return Ok(_mapper.Map<CategoryViewModel>(category));
         }
 
         [HttpPatch("{id}")]
         public async Task<IActionResult> PartiallyUpdate(long id, JsonPatchDocument<CategoryDto> patchDocument)
         {
-            var categoryEntity = await _dbContext.Categories.FirstOrDefaultAsync(p => p.Id == id);
+            var category
+                = await _dbContext
+                    .Categories
+                    .FirstOrDefaultAsync(p => p.Id == id);
 
-            if (categoryEntity == null)
+            if (category == null)
             {
-                return NotFound();
+                return NotFound("Category not found.");
             }
 
-            var categoryDto = _mapper.Map<CategoryDto>(categoryEntity);
+            var categoryDto = _mapper.Map<CategoryDto>(category);
 
             patchDocument.ApplyTo(categoryDto);
 
@@ -96,18 +111,20 @@ namespace MyStore.OpenApi.V1.Controllers
                 return ValidationProblem(validationResult.ToModelState());
             }
 
-            _mapper.Map(categoryDto, categoryEntity);
-            categoryEntity.ModifiedAt = DateTimeOffset.Now;
-
+            _mapper.Map(categoryDto, category);
+            category.ModifiedAt = DateTimeOffset.Now;
             await _dbContext.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(_mapper.Map<CategoryViewModel>(category));
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(long id)
         {
-            var category = await _dbContext.Categories.FirstOrDefaultAsync(p => p.Id == id);
+            var category
+                = await _dbContext
+                    .Categories
+                    .FirstOrDefaultAsync(p => p.Id == id);
 
             if (category == null)
             {
