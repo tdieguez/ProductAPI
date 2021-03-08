@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MyStore.OpenApi.Data;
 using MyStore.OpenApi.V1.Validators;
+using Newtonsoft.Json;
 
 namespace MyStore.OpenApi
 {
@@ -26,7 +27,7 @@ namespace MyStore.OpenApi
         {
             services
                 .AddControllers()
-                .AddNewtonsoftJson()
+                .AddNewtonsoftJson(nj => nj.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore)
                 .AddFluentValidation(fv =>
                 {
                     fv.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
