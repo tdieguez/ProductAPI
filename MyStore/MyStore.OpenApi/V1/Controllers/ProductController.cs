@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -10,6 +11,7 @@ using MyStore.OpenApi.Entities;
 using MyStore.OpenApi.Extensions;
 using MyStore.OpenApi.V1.Dtos;
 using MyStore.OpenApi.V1.Validators;
+using MyStore.OpenApi.V1.ViewModels;
 
 namespace MyStore.OpenApi.V1.Controllers
 {
@@ -27,66 +29,106 @@ namespace MyStore.OpenApi.V1.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<ActionResult<IEnumerable<ProductViewModel>>> GetAll()
         {
-            return Ok(await _dbContext.Products.ToListAsync());
+            var products
+                = await _dbContext
+                    .Products
+                    .Include(p => p.Category)
+                    .ToListAsync();
+
+            return Ok(_mapper.Map<IEnumerable<ProductViewModel>>(products));
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetOne(long id)
+        public async Task<ActionResult<ProductViewModel>> GetOne(long id)
         {
-            var productEntity = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == id);
+            var productEntity
+                = await _dbContext
+                    .Products
+                    .Include(p => p.Category)
+                    .FirstOrDefaultAsync(p => p.Id == id);
 
             if (productEntity == null)
             {
-                return NotFound();
+                return NotFound("Product not found.");
             }
 
-            return Ok(productEntity);
+            return Ok(_mapper.Map<ProductViewModel>(productEntity));
         }
 
         [HttpPost]
-        public async Task<ActionResult<ProductDto>> Create(ProductDto product)
+        public async Task<ActionResult<ProductViewModel>> Create(ProductDto product)
         {
             var productEntity = _mapper.Map<Product>(product);
+
             productEntity.CreatedAt = DateTimeOffset.Now;
             productEntity.ModifiedAt = DateTimeOffset.Now;
 
+            var productCategory
+                = await _dbContext
+                    .Categories
+                    .FirstOrDefaultAsync(c => c.Id == productEntity.Category.Id);
+
+            if (productCategory == null)
+            {
+                return NotFound("Category not found.");
+            }
+
+            productEntity.Category = productCategory;
             _dbContext.Add(productEntity);
             await _dbContext.SaveChangesAsync();
 
-            return Ok(productEntity);
+            return Ok(_mapper.Map<ProductViewModel>(productEntity));
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<ProductDto>> Update(long id, ProductDto product)
+        public async Task<ActionResult<ProductViewModel>> Update(long id, ProductDto productDto)
         {
-            var productEntity = _dbContext.Products.FirstOrDefault(p => p.Id == id);
+            var product
+                = await _dbContext
+                    .Products
+                    .FirstOrDefaultAsync(p => p.Id == id);
 
-            if (productEntity == null)
+            if (product == null)
             {
-                return NotFound();
+                return NotFound("Product not found.");
             }
 
-            _mapper.Map(product, productEntity);
-            productEntity.ModifiedAt = DateTimeOffset.Now;
+            _mapper.Map(productDto, product);
+            
+            var category
+                = await _dbContext
+                    .Categories
+                    .FirstOrDefaultAsync(c => c.Id == product.Category.Id);
 
+            if (category == null)
+            {
+                return NotFound("Category not found.");
+            }
+
+            product.Category = category;
+            product.ModifiedAt = DateTimeOffset.Now;
             await _dbContext.SaveChangesAsync();
 
-            return Ok(productEntity);
+            return Ok(_mapper.Map<ProductViewModel>(product));
         }
 
         [HttpPatch("{id}")]
-        public async Task<IActionResult> PartiallyUpdate(long id, JsonPatchDocument<ProductDto> patchDocument)
+        public async Task<ActionResult<ProductViewModel>> PartiallyUpdate(long id, JsonPatchDocument<ProductDto> patchDocument)
         {
-            var productEntity = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == id);
+            var product
+                = await _dbContext
+                    .Products
+                    .Include(p => p.Category)
+                    .FirstOrDefaultAsync(p => p.Id == id);
 
-            if (productEntity == null)
+            if (product == null)
             {
-                return NotFound();
+                return NotFound("Product not found.");
             }
 
-            var productDto = _mapper.Map<ProductDto>(productEntity);
+            var productDto = _mapper.Map<ProductDto>(product);
 
             patchDocument.ApplyTo(productDto);
 
@@ -95,23 +137,37 @@ namespace MyStore.OpenApi.V1.Controllers
             {
                 return ValidationProblem(validationResult.ToModelState());
             }
-            
-            _mapper.Map(productDto, productEntity);
-            productEntity.ModifiedAt = DateTimeOffset.Now;
- 
+
+            _mapper.Map(productDto, product);
+
+            var category
+                = await _dbContext
+                    .Categories
+                    .FirstOrDefaultAsync(c => c.Id == product.Category.Id);
+
+            if (category == null)
+            {
+                return NotFound("Category not found.");
+            }
+
+            product.Category = category;
+            product.ModifiedAt = DateTimeOffset.Now;
             await _dbContext.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(_mapper.Map<ProductViewModel>(product));
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(long id)
         {
-            var product = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == id);
+            var product
+                = await _dbContext
+                    .Products
+                    .FirstOrDefaultAsync(p => p.Id == id);
 
             if (product == null)
             {
-                return NotFound();
+                return NotFound("Product not found.");
             }
 
             _dbContext.Products.Remove(product);
