@@ -11,13 +11,7 @@ namespace MyStore.OpenApi.V1.Profiles
     {
         public ProductProfile()
         {
-            CreateMap<ProductDto, Product>()
-                .ForMember(
-                    d => d.Category,
-                    o => o.MapFrom(p => new Category() {Id = p.CategoryId})
-                )
-                .ReverseMap();
-
+            CreateMap<ProductDto, Product>().ReverseMap();
             CreateMap<Product, ProductViewModel>();
         }
     }

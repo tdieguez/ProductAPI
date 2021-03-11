@@ -68,14 +68,13 @@ namespace MyStore.OpenApi.V1.Controllers
             var productCategory
                 = await _dbContext
                     .Categories
-                    .FirstOrDefaultAsync(c => c.Id == productEntity.Category.Id);
+                    .FirstOrDefaultAsync(c => c.Id == productEntity.CategoryId);
 
-            if (productCategory == null)
+            if (productCategory != null)
             {
-                return NotFound("Category not found.");
+                productEntity.Category = productCategory;
             }
 
-            productEntity.Category = productCategory;
             _dbContext.Add(productEntity);
             await _dbContext.SaveChangesAsync();
 
@@ -96,7 +95,7 @@ namespace MyStore.OpenApi.V1.Controllers
             }
 
             _mapper.Map(productDto, product);
-            
+
             var category
                 = await _dbContext
                     .Categories
